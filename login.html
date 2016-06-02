@@ -1,0 +1,216 @@
+<!--<div class="login container">-->
+    <!--<div class="span7">-->
+    	<!--<div class="header"></div>-->
+    	<!--<div class="form">-->
+	    	<!--<form class="loginForm form-horizontal">-->
+		    	<!--<legend>Easy Building</legend>-->
+
+				<!--<div class="form-group">-->
+					<!--<label class="col-lg-2 control-label" for="inputEmail">用户名</label>-->
+					<!--<div class="col-lg-4">-->
+						<!--<div class="input-group">-->
+		  					<!--<span class="input-group-addon">@</span>-->
+							<!--<input type="email" class="form-control username" id="inputEmail" placeholder="">-->
+						<!--</div>-->
+					<!--</div>-->
+				<!--</div>-->
+				<!--<div class="form-group">-->
+					<!--<label class="col-lg-2 control-label" for="inputPassword">密码</label>-->
+					<!--<div class="col-lg-4">-->
+						<!--<div class="input-group">-->
+			 				<!--<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>-->
+							<!--<input type="password" class="form-control password" id="inputPassword" placeholder="">-->
+						<!--</div>-->
+					<!--</div>-->
+				<!--</div>-->
+				<!--<div class="form-group">-->
+					<!--<div class="col-lg-offset-2 col-lg-10">-->
+						<!--<label class="checkbox"> <input type="checkbox" class="rememberme" id="rememberMe"> 记住我-->
+						<!--</label>-->
+						<!--<button type="button" class="btn loginButton btn-primary ">登录</button>-->
+						<!--&lt;!&ndash;<button type="button" class="btn btn-default resetPasswordButton">Reset password</button>-->
+						<!--<button type="button" class="btn btn-default registerButton initialhide">Register</button>&ndash;&gt;-->
+					<!--</div>-->
+				<!--</div>-->
+			<!--</form>-->
+		<!--</div>-->
+	<!--</div>-->
+<!--</div>-->
+
+
+
+
+
+
+<div id="container" class="cls-container ">
+
+	<div id="bg-overlay" class="bg-img img-balloon"></div>
+
+	<div class="cls-header cls-header-lg">
+		<div class="cls-brand">
+
+				<span class="brand-title">Eking Building</span>
+		</div>
+	</div>
+	<!--===================================================-->
+	<!-- LOGIN FORM -->
+	<!--===================================================-->
+	<div class="cls-content">
+		<div class="cls-content-sm panel">
+			<div class="panel-body">
+				<p class="pad-btm" style="margin-top: 10px;">Sign In to your account</p>
+				<form class="loginForm form-horizontal" style="padding:20px 40px;">
+					<div class="form-group" >
+						<div class="input-group" >
+							<div class="input-group-addon">
+								<i class="fa fa-user"></i>
+							</div>
+							<input type="email"  class="form-control username" placeholder="Username" id="inputEmail" placeholder="" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="input-group">
+							<div class="input-group-addon">
+								<i class="fa fa-asterisk"></i>
+							</div>
+							<input type="password" class="form-control password" placeholder="Password"   id="inputPassword" placeholder=""/>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-8 text-left checkbox">
+							<label class="form-checkbox form-icon">  <input type="checkbox" id="rememberMe" /> 记住我 </label>
+						</div>
+
+					</div>
+
+					<button class="btn btn-primary btn-lg btn-block loginButton btn-primary" type="button"> 登录 </button>
+				</form>
+			</div>
+		</div>
+
+	</div>
+	<!--===================================================-->
+	<!-- DEMO PURPOSE ONLY -->
+	<!--===================================================-->
+	<div class="demo-bg">
+		<div id="demo-bg-list">
+			<div class="demo-loading">
+				<i class="fa fa-refresh"></i>
+			</div>
+			<img class="demo-chg-bg bg-trans" src="images/thumbs/bg-trns.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-1.jpg" alt="Background Image" />
+			<img class="demo-chg-bg active" src="images/thumbs/bg-img-2.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-3.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-4.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-5.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-6.jpg" alt="Background Image" />
+			<img class="demo-chg-bg" src="images/thumbs/bg-img-7.jpg" alt="Background Image" />
+		</div>
+	</div>
+	<!--===================================================-->
+</div>
+
+
+
+<script>
+function Login(address, username) {
+	var othis = this;
+
+	if (address != null && address.startsWith("http://")) {
+		address = address.substring(7);
+	}
+
+	this.show = function(){};
+
+	Global.bimServerApi.call("AdminInterface", "getVersion", {}, function(version){
+		if (!Settings.usableBimServerVersion(version)) {
+			var versionString = version.major + "." + version.minor + "." + version.revision;
+			Global.notifier.setInfo("This version of BIMserver (" + versionString + ") has not been tested with this version of " + Settings.getTitle());
+		}
+	});
+
+	this.login = function(address) {
+		Global.bimServerApi.login($(".username").val(), $("#inputPassword").val(), function(data){
+			if ($("#rememberMe").is(":checked")) {
+				// Stored cookie
+				$.cookie("autologin" + window.document.location.port, Global.bimServerApi.token, { expires: 31, path: "/"});
+				$.cookie("address" + window.document.location.port, Global.bimServerApi.baseUrl, { expires: 31, path: "/"});
+			} else {
+				// Session cookie
+				$.cookie("autologin" + window.document.location.port, Global.bimServerApi.token, { path: "/"});
+				$.cookie("address" + window.document.location.port, Global.bimServerApi.baseUrl, { path: "/"});
+			}
+			Global.bimServerApi.resolveUser(function(user){
+				$(".indexcontainer").load(Global.baseDir + "main.html", function(){
+					new Main(address, user).show(false);
+				});
+			});
+		});
+	}
+
+	if (address != null) {
+		$(".serverAddress").html(address);
+	}
+
+	if (!Settings.allowBimServerAddress()) {
+		$(".serverDiv").hide();
+	}
+
+	if (username != null) {
+		$("#inputEmail").val(username);
+	}
+
+	$(".header").load(Global.baseDir + "header.html");
+
+	$(".loginButton").click(function(){
+		othis.login($("#inputServer").val());
+	});
+
+	$(".login .username, .login .address, .login .password, .login .rememberme").enterpress(function(){
+		othis.login($("#inputServer").val());
+	});
+
+	this.resetPassword = function(){
+		Global.bimServerApi.callWithFullIndication("AuthInterface", "requestPasswordChange", {username: $(".username").val(), resetUrl: Global.baseDir + "?page=ResetPassword"}, function(){
+
+		});
+	};
+
+	this.openIdClick = function(){
+		$(".openidDiv").show();
+		$(".loginForm").hide();
+	};
+
+	this.registerClick = function(){
+		$(".indexcontainer").load(Global.baseDir + "register.html", function(){
+			new Register($(this));
+		});
+	};
+
+	$(".registerButton").click(othis.registerClick);;
+
+	$(".resetPasswordButton").click(function(){
+		othis.resetPassword();
+	});
+
+	Global.bimServerApi.call("SettingsInterface", "isAllowSelfRegistration", {}, function(enabled){
+		if (enabled) {
+			$(".registerButton").show();
+		}
+	});
+
+	if (username == null) {
+		$("#inputEmail").focus();
+	} else {
+		$("#inputPassword").focus();
+	}
+
+	pushHistory({page: "Login"}, "Login");
+
+	$(".otherServerLink").click(function(){
+		$(".indexcontainer").load(Global.baseDir + "selectserver.html", function(){
+			new SelectServer();
+		});
+	});
+}
+</script>
